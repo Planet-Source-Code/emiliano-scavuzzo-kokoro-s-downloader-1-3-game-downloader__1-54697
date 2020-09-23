@@ -1,0 +1,3 @@
+ This tool lets you upload files to Yahoo Briefcase. All you have to do is to create an account and put the information in the textboxes. Then add files to the upload list by clicking the filelist box or the Add button. Then press the Upload button and go to sleep.
+ You can remove items with the Remove and Remove all buttons, export and import the upload list, and check how many space of your account you have consumed. My Documents is the only folder you can use for the moment.
+ REMEMBER NOT TO EXCEED YOUR STORAGE LIMIT OR YOU WONT BE ABLE TO DOWNLOAD YOUR FILES.

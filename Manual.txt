@@ -1,0 +1,285 @@
+Kokoro's Downloader 1.3 manual
+==============================
+
+If you want to use KD just to download games read the help file, if you want to learn how does it work and how you can upgrade it read on.
+
+*** How does it work?
+=====================
+KD uses three servers to maintain the system. I use free web hosting providers (that's the idea). These servers are:
+
+* The main info server:
+From this server KD gets the game info files and the game list.
+* The backup server:
+This server has the same info files the main server has, and is used when the connection with the main server fails.
+* Update server:
+This server has only one file that you can use to change the main and backup server addresses at will. This server SHOULD be the most reliable.
+
+You SHOULD use three different web servers.
+
+
+
+*** How does KD find a game info file?
+======================================
+When user enters the game code in the textbox and press OK, KD tries to download this file from the main info server:
+
+	main server address + game code + '.' + main server info extension
+
+For example, if your main server address is "http://www.geocities.com/mainserver/", the main server info extension is "txt" and the user entered the code "game1", then KD will try to download this file:
+
+	http://www.geocities.com/mainserver/game1.txt
+
+If: 
+
+1) the connection with the main server fails or 
+2) the info file is missing from the main server or
+3) the info file downloaded contains erroneous data
+
+then KD will try to download the info file from the backup server:
+
+	backup server address + game code + '.' + backup server info extension
+
+If this fails too, then it shows the wrong code message.
+
+Note that the info file extensions can be different for each server. The default main and backup servers for KD are constants DATABASE_MAIN_DEFAULT and DATABASE_BKP_DEFAULT (see GlobalVariables module). The default extension for both servers is EXTENSION_INFO_DEFAULT.
+
+
+
+*** How does KD find the game list?
+===================================
+Same way it finds the info files. For the main server:
+
+	main server address + main server game list name
+
+If it fails it tries the backup server:
+
+	backup server address + backup server game list name
+
+If this fails too, it shows the datebase not found message.
+
+The default game list name for both servers is the constant GAME_LIST_NAME_DEFAULT (see GlobalVariables module).
+
+
+
+*** Update system
+=================
+When the user tries to check a code or tries to download the game list (whatever happens first) for the first time since he/she started the program, KD tries to download the update file from the update server:
+
+	update server file address
+
+
+If this file can't be downloaded correctly, KD continues without any warning. The default update server file address is the constant UPDATE_SERVER_DEFAULT (see GlobalVariables module).
+
+
+
+*** Update file format
+======================
+The update file is a simple text file with 4 lines:
+
+1) Check string line.
+This line contains a string that is used to check if the file downloaded is actually the update file and not another thing (see UPDATE_VERIFICATION_LINE).
+
+2) Current version line.
+This line contains an integer number that represents the current version available. If this number is bigger than the version number (see VERSION constant) of the program the user has, KD raises a message informing about this and don't let the user download any game.
+
+3) Main server line.
+This line contains three strings separated by commas: the main server address, the main server info extension and the main server game list name.
+
+4) Backup server line.
+This line contains three strings separated by commas: the backup server address, the backup server info extension and the backup server game list name.
+
+This is a sample:
+
+FullGames Update
+13
+http://fgdata.my100megs.com/, fgi, list.fgl
+http://fgbackup.250free.com/, fgi, list.fgl
+
+
+
+*** Kind of Downloads (KODs) and info file format (first part)
+==============================================================
+KD can use different KODs to download games. KD uses numbers to identify KODs. At the moment there is only one KOD (see DOWN_BRIEFCASE constant). When KD downloads an info file, the first ten lines (see LN_END) are used by the graphic interface of KD, and the rest is passed to the KOD for error checking and download purposes. The info files are encrypted with a dummy algorithm, so web hosting providers can't see what's in them. To read and create the info files use Criptonita, a tool program I created to do this.
+
+The info file format is:
+
+1) (LN_FIRST) Check string line.
+Used to check if the file downloaded is actually an info file (see INFO_VERIFICATION_LINE).
+
+2) (LN_UPD_SRV) Update file address.
+If this file address is different from UPDATE_SERVER_DEFAULT, this new value is saved in the registry and is used for that moment on as the new update file address.
+
+3) (LN_PREV_ADDR) Preview image address.
+The address of the game image. If KD fails to download this file, it shows an empty picture box.
+
+4) (LN_NAME) Game name.
+
+5) (LN_TYPE) Type of game.
+
+6) (LN_TOT_SIZE) Game total size in bytes.
+
+7) (LN_PACK_NUM) Amount of packages.
+This is the number of packages the game is divided on. If you use Winzip 8.1 or above you can use the Split function to divide your files.
+
+8) (LN_SOFTWARE) Required software.
+
+9) (LN_DOWN_KIND) Kind of download (KOD).
+This number specifies the KOD that KD is going to use to download the game.
+
+10) (LN_NOTES) Notes.
+Extra notes for your game. You can leave this line blank.
+
+10-X) KOD lines.
+
+The eleventh line and forward belongs to to the KOD system. KODs MUST use LN_END constant to learn where their lines begin.
+
+This is a sample:
+
+FullGames Info
+http://www.geocities.com/fgupdate/update.txt
+http://fgdata.my100megs.com/ac001.jpg
+Grand Theft Auto 1
+Action
+29127634
+6
+Winzip 8.1 or higher to decompress
+1
+This game now is free!
+
+
+
+*** Game list file format
+=========================
+The game list is encrypted with a dummy algorithm, so web hosting providers can't see what's in it. To read and create the game list file use Criptonita, a tool program I created to do this. The list has three types of lines:
+
+1) Check string line.
+Used to check if the file downloaded is actually the game list (see LIST_VERIFICATION_LINE).
+
+2) Update file address.
+If this file address is different from UPDATE_SERVER_DEFAULT, this new value is saved in the registry and is used for that moment on as the new update file address.
+
+3-X) Game lines
+
+Format of each game line:
+
+'Icon', 'Game title', 'Code', 'Type', 'Size [MB/KB]', 'Style'
+
+The 'Icon' data is a number between 1 and 20 (see imlIcons image list).
+The 'Style' data is a pair of letters for normal style or two pairs of letters for flashing style. The first letter of each pair can be 'H' for normal font or 'B' for bold font. The second letter of each pair can be any letter of the rest of the alphabet and represents a color (see LetterToColor function).
+
+This is a sample:
+
+FullGames GameList
+http://www.geocities.com/fgupdate/update.txt
+1, Grand Theft Auto 1, ac001, Action, 27.78 MB, HNHA
+1, Smoke Attack, ad001, Adventure, 5.97 MB, HR
+1, Zelda Classic v1.90, ad002, Adventure, 2.69 MB, HN
+1, Trash Killer 2, ar001, Arcade, 1.81 MB, HN
+1, Pac-Manhattan, ar002, Arcade, 1.09 MB, HN
+1, Rescue from Space Invaders, ar003, Arcade, 2.12 MB, HN
+1, GT Challenge, ra001, Racing, 4.15 MB, HN
+
+
+NOTES: 1) Space after the comma is optional.
+       2) Use a point to separate decimal part from the game size.
+       3) If you want to use a comma in any of these strings use %2C (see Decode function)
+
+*** KOD 1: Yahoo Briefcase Download
+===================================
+KOD 1 uses yahoo briefcase (www.yahoo.com) service to store the games. You can create as many accounts as you want, but each file can't exceed 5 MB. After you upload a file you can share it by checking it and emailing the link (make sure you select No Expiration option).
+We have two problems with this: first, the link you can share is not a link to the file itself, but a link to a web page that contains the link to the file. The link to the file changes periodically so we can't use it in the info files. What KOD 1 does is to download the web page, searches for the 'real link' to the file, and then downloads it.
+The second problem to solve is what do we do if we want to share a file larger than 5 MB. KOD 1 has two solutions to this problem, the first solution is to add the files to an archive like Winzip files and then split it into smaller pieces (packages). The second solution is to use partitioned files. The difference is that user only sees packages, but no partitions.
+I really don't recommend using partitions, since is quite hard to understand. The only case you would need partitions is when you want to share a really big file (more than 500 MB), so if you try to split this file in 5 MB sections WinZip wont let you (more than 100 packages).
+
+
+
+*** Searching for the file real link
+====================================
+After we download the web page that contains the 'real link' to the file, we have to find this link in the page HTML code. We know (HTML basics) that each link comes after a "href=" string. But the web page has many links, how do we know which is the right one? What is worst: what happens if yahoo decides to change the page layout and the link ends up somewhere else?.
+To solve these problems we use AdvanceSearch module. Basically, what we do is to tell KD how it can find the correct link. We use a string with As and Bs separated with commas. For example, to tell KD that the link comes after "This is the link" we use A(1)="This is the link", the 1 means that the link comes after the first occurrence. Another example:
+
+A(2)="AfterThis", A(1)="AndThis", B(2)="BeforeThis"
+
+tells KD that the link comes after two strings "AfterThis" and one string "AndThis" and before two strings "BeforeThis".
+
+At the moment the string we use to locate the link is B(1)="My+Documents".
+
+
+*** Info file format (second part)
+==================================
+The second part of the info file belongs to the KODs. In KOD 1 this part consists in three lines followed by the packages (and partitions) lines:
+
+LN_END+1) Number of partitions the package is divided on. If you don't use partitions write 1.
+
+LN_END+2) Size in bytes of each partition. If you don't use partitions write the size of each package.
+
+LN_END+3) String to search for the real package link.
+
+LN_END+4) Package lines. Format:
+           name.xxx, http://address
+
+After this line comes the partitions lines (if any) with this format:
+           http://address
+
+Then another package line with the format of LN_END+4
+
+NOTE: the last package is smaller or equal to the rest but never bigger. The rest of the packages have equal size.
+
+This is a sample:
+
+1
+5000000
+B(1)="My+Documents"
+gta1.z01, http://briefcase.yahoo.com/bc/richiest25/vwp2?.tok=bcTG.TRBHaj.SA24&.dir=/My+Documents&.dnm=gta1.z01&.src=bc
+gta1.z02, http://briefcase.yahoo.com/bc/richiest25/vwp2?.tok=bcwJ5XRB6.AT9MrX&.dir=/My+Documents&.dnm=gta1.z02&.src=bc
+gta1.z03, http://briefcase.yahoo.com/bc/richiest25/vwp2?.tok=bcML5XRBzOMG10BZ&.dir=/My+Documents&.dnm=gta1kul&.src=bc
+gta1.z04, http://briefcase.yahoo.com/bc/rocketo22/vwp2?.tok=bcvO5XRB.5fedigA&.dir=/My+Documents&.dnm=gta1.ear&.src=bc
+gta1.z05, http://briefcase.yahoo.com/bc/colimante/vwp2?.tok=bcDt5XRBMuzCYTNW&.dir=/My+Documents&.dnm=gta1.swq&.src=bc
+gta1.zip, http://briefcase.yahoo.com/bc/colimante/vwp2?.tok=bcdE5XRB72744KwD&.dir=/My+Documents&.dnm=gta1.lop&.src=bc
+
+
+
+*** Making your own KODs
+========================
+If you know a better server, or a simpler way to share your files you can make your own KODs. KODs are classes that share a common interface (public functions).
+To create your KOD:
+
+1) Add a class module.
+
+2) In the declaration area of your class add this line
+
+Implements cCommon
+
+This forces your class to implement 6 public functions:
+
+cCommon_CheckPackages
+When KD calls this function, your class MUST check for any error in the info from the line LN_END+1 to the end. The info will be in the string m_strInfo; you can use ReadLine function to read each line. If your class finds an error it MUST raise an error (Err.Raise).
+
+cCommon_ReadPackages
+When KD calls this function, your class MUST fill the packages list (lstPackages) with the packages in the info.
+
+cCommon_Download
+When KD calls this function, your class MUST start the download process. Use the variables in GlobalVariables to learn about the preferences. When you are ready to download you MUST call the StartStateTimer function to start the speed control. From that moment your class must be prepared to receive calls to cCommon_PackageSize and cCommon_AmountDownloaded functions. When you finish the download call StopStateTimer.
+
+cCommon_StopDownload
+When KD call this function, your class MUST stop the download process and clean everything.
+
+cCommon_PackageSize
+This function MUST return the size of the package being downloaded.
+
+cCommon_AmountDownloaded
+This function MUST return the amount of downloaded bytes of the package being downloaded.
+
+
+3) Go to BuildDownloadClass function in Communication module and add these lines to the Select Case block:
+
+ Case 'insert your KOD number here'
+ 	set m_clsDownload = new 'insert your class name here'
+
+That's it!
+
+
+Emiliano Scavuzzo <anshoku@yahoo.com>
+June, 28th 2004
+Rosario, Argentina
+
+
