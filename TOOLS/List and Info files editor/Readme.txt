@@ -1,0 +1,1 @@
+Criptonita is a notepad clone that lets you read and write info and list files encrypted with my dummy algorithm.

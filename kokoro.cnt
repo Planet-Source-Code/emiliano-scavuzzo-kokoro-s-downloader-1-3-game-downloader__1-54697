@@ -1,0 +1,14 @@
+;This help file was created with HelpScribble 7.1.0
+;Registered to: NiTROUS
+
+:BASE kokoro.hlp
+:TITLE 
+1 Introdution to Kokoro's Downloader
+2 Introduction=Scribble10>main
+1 Using Kokoro's Downloader
+2 Interface=Scribble20>main
+2 Search for games=Scribble30>main
+2 Download games=Scribble40>main
+2 Preferences=Scribble50>main
+1 Copyright
+2 Copyright=Scribble60>main
